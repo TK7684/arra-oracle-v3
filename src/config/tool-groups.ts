@@ -4,7 +4,7 @@
  * Controls which tool groups are registered at startup.
  * Config sources (in priority order):
  *   1. arra.config.json in repo root (ORACLE_REPO_ROOT or cwd)
- *   2. ~/.arra-oracle-v3/config.json (global)
+ *   2. ~/.arra-oracle-v2/config.json (global)
  *   3. Defaults: all groups enabled
  */
 
@@ -51,10 +51,10 @@ export function loadToolGroupConfig(repoRoot?: string): ToolGroupConfig {
     return { ...DEFAULT_CONFIG, ...localConfig.tools };
   }
 
-  // Priority 2: global ~/.arra-oracle-v3/config.json
-  const globalConfig = readJsonSafe(path.join(homeDir, '.arra-oracle-v3', 'config.json'));
+  // Priority 2: global ~/.arra-oracle-v2/config.json
+  const globalConfig = readJsonSafe(path.join(homeDir, '.arra-oracle-v2', 'config.json'));
   if (globalConfig?.tools) {
-    console.error('[ToolGroups] Using ~/.arra-oracle-v3/config.json');
+    console.error('[ToolGroups] Using ~/.arra-oracle-v2/config.json');
     return { ...DEFAULT_CONFIG, ...globalConfig.tools };
   }
 

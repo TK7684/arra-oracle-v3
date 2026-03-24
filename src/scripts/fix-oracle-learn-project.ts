@@ -10,7 +10,7 @@ import { homedir } from 'os';
 import path from 'path';
 import fs from 'fs';
 
-const REPO_ROOT = path.join(homedir(), 'Code/github.com/Soul-Brews-Studio/arra-oracle-v3');
+const REPO_ROOT = path.join(homedir(), 'Code/github.com/Soul-Brews-Studio/arra-oracle-v2');
 
 // Find all arra_learn docs without project using Drizzle
 const docs = db.select({

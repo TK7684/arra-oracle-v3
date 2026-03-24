@@ -1,6 +1,6 @@
 /**
  * MCP (Model Context Protocol) Integration Tests
- * Tests arra-oracle-v3 MCP tools via stdio transport
+ * Tests arra-oracle-v2 MCP tools via stdio transport
  *
  * Requires MCP server to be startable. If the server can't connect,
  * tests fail with a clear message rather than silently skipping.

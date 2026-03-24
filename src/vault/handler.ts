@@ -221,8 +221,8 @@ export function initVault(repo: string): InitResult {
   setSetting('vault_repo', repo);
   setSetting('vault_enabled', 'true');
 
-  // 3. Create ~/.arra-oracle-v3/ψ symlink → vault repo's ψ/
-  const oracleHome = path.join(os.homedir(), '.arra-oracle-v3');
+  // 3. Create ~/.arra-oracle-v2/ψ symlink → vault repo's ψ/
+  const oracleHome = path.join(os.homedir(), '.arra-oracle-v2');
   const psiSymlink = path.join(oracleHome, 'ψ');
   const vaultPsiDir = path.join(vaultPath, 'ψ');
 

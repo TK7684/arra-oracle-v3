@@ -105,11 +105,11 @@ class OracleMCPServer {
     const pkg = JSON.parse(fs.readFileSync(path.join(import.meta.dirname || __dirname, '..', 'package.json'), 'utf-8'));
     this.version = pkg.version;
     this.server = new Server(
-      { name: 'arra-oracle-v3', version: this.version },
+      { name: 'arra-oracle-v2', version: this.version },
       { capabilities: { tools: {} } }
     );
 
-    const oracleDataDir = process.env.ORACLE_DATA_DIR || path.join(homeDir, '.arra-oracle-v3');
+    const oracleDataDir = process.env.ORACLE_DATA_DIR || path.join(homeDir, '.arra-oracle-v2');
     const dbPath = process.env.ORACLE_DB_PATH || path.join(oracleDataDir, 'oracle.db');
     const { sqlite, db } = createDatabase(dbPath);
     this.sqlite = sqlite;
@@ -209,7 +209,7 @@ class OracleMCPServer {
         return {
           content: [{
             type: 'text',
-            text: `Error: Tool "${request.params.name}" is disabled by tool group config. Check ~/.arra-oracle-v3/config.json or arra.config.json.`
+            text: `Error: Tool "${request.params.name}" is disabled by tool group config. Check ~/.arra-oracle-v2/config.json or arra.config.json.`
           }],
           isError: true
         };

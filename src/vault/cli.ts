@@ -3,7 +3,7 @@
  * Oracle Vault CLI
  *
  * Global CLI for managing the Oracle knowledge vault.
- * Can be run from any repo after `bun add -g @laris-co/arra-oracle-v3`.
+ * Can be run from any repo after `bun add -g @laris-co/arra-oracle-v2`.
  *
  * Usage:
  *   oracle-vault init <owner/repo>
