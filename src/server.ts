@@ -394,7 +394,7 @@ app.post('/api/settings', async (c) => {
 
 // Health check
 app.get('/api/health', (c) => {
-  return c.json({ status: 'ok', server: 'arra-oracle', port: PORT, oracleV2: 'connected' });
+  return c.json({ status: 'ok', server: 'arra-oracle-v3', port: PORT, oracleV2: 'connected' });
 });
 
 // Search
@@ -536,8 +536,8 @@ app.get('/api/map3d', async (c) => {
   }
 });
 
-// Live Oracle feed (from ~/.oracle/feed.log)
-const FEED_LOG = path.join(process.env.HOME || '/tmp', '.oracle', 'feed.log');
+// Live Oracle feed (from ~/.arra-oracle-v3/feed.log)
+const FEED_LOG = path.join(process.env.HOME || '/home/nat', '.arra-oracle-v3', 'feed.log');
 app.get('/api/feed', (c) => {
   try {
     const limit = Math.min(200, parseInt(c.req.query('limit') || '50'));
@@ -582,6 +582,32 @@ app.get('/api/feed', (c) => {
   } catch (e: any) {
     return c.json({ error: e.message, events: [], total: 0 }, 500);
   }
+});
+
+// WASM Plugins (served from ~/.oracle/plugins/)
+const PLUGINS_DIR = path.join(process.env.HOME || '/home/nat', '.oracle', 'plugins');
+
+app.get('/api/plugins', (c) => {
+  try {
+    if (!fs.existsSync(PLUGINS_DIR)) return c.json({ plugins: [] });
+    const files = fs.readdirSync(PLUGINS_DIR).filter(f => f.endsWith('.wasm'));
+    const plugins = files.map(f => {
+      const stat = fs.statSync(path.join(PLUGINS_DIR, f));
+      return { name: f.replace('.wasm', ''), file: f, size: stat.size, modified: stat.mtime.toISOString() };
+    });
+    return c.json({ plugins });
+  } catch (e: any) {
+    return c.json({ plugins: [], error: e.message });
+  }
+});
+
+app.get('/api/plugins/:name', (c) => {
+  const name = c.req.param('name');
+  const file = name.endsWith('.wasm') ? name : `${name}.wasm`;
+  const filePath = path.join(PLUGINS_DIR, file);
+  if (!fs.existsSync(filePath)) return c.json({ error: 'Plugin not found' }, 404);
+  const buf = fs.readFileSync(filePath);
+  return new Response(buf, { headers: { 'Content-Type': 'application/wasm' } });
 });
 
 // Logs
@@ -810,7 +836,7 @@ app.get('/api/session/stats', (c) => {
 
 // Serve raw schedule.md for frontend rendering
 app.get('/api/schedule/md', (c) => {
-  const schedulePath = path.join(process.env.HOME || '/tmp', '.oracle', 'ψ/inbox/schedule.md');
+  const schedulePath = path.join(process.env.HOME || '/tmp', '.arra-oracle-v3', 'ψ/inbox/schedule.md');
   if (fs.existsSync(schedulePath)) {
     return c.text(fs.readFileSync(schedulePath, 'utf-8'));
   }
