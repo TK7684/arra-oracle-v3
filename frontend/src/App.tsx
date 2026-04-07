@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { QuickLearn } from './components/QuickLearn';
+import { OracleNetBar } from './components/OracleNetBar';
 import { Overview } from './pages/Overview';
 import { Feed } from './pages/Feed';
 import { DocDetail } from './pages/DocDetail';
@@ -66,6 +67,7 @@ function AppContent() {
         <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
       </Routes>
       {!isLoginPage && <QuickLearn />}
+      {!isLoginPage && <OracleNetBar />}
     </>
   );
 }

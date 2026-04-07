@@ -15,3 +15,4 @@ export const CHROMADB_DIR_NAME = '.chromadb';
 export const MCP_SERVER_NAME = 'arra-oracle-v2';
 export const COLLECTION_NAME = 'oracle_knowledge';
 export const PID_FILE_NAME = 'oracle-http.pid';
+export const ORACLENET_DEFAULT_URL = 'https://urchin-app-csg5x.ondigitalocean.app';
