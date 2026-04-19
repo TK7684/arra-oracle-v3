@@ -8,10 +8,21 @@ import type { Static } from 'elysia';
 export const MenuItemSchema = t.Object({
   path: t.String(),
   label: t.String(),
-  group: t.Union([t.Literal('main'), t.Literal('tools'), t.Literal('hidden')]),
+  group: t.Union([
+    t.Literal('main'),
+    t.Literal('tools'),
+    t.Literal('hidden'),
+    t.Literal('admin'),
+  ]),
   order: t.Number(),
-  source: t.Union([t.Literal('api'), t.Literal('page'), t.Literal('plugin')]),
-  studio: t.Optional(t.String()),
+  icon: t.Optional(t.String()),
+  studio: t.Optional(t.Nullable(t.String())),
+  access: t.Optional(t.Union([t.Literal('public'), t.Literal('auth')])),
+  source: t.Union([
+    t.Literal('api'),
+    t.Literal('page'),
+    t.Literal('plugin'),
+  ]),
 });
 
 export type MenuItem = Static<typeof MenuItemSchema>;
