@@ -14,6 +14,7 @@ import {
 } from '../forum/handler.ts';
 
 import type { ToolResponse } from './types.ts';
+import { filterBySender } from '../trust/gate.ts';
 
 // ============================================================================
 // Input interfaces
@@ -183,6 +184,18 @@ export async function handleThreadRead(input: OracleThreadReadInput): Promise<To
     timestamp: new Date(m.createdAt).toISOString(),
   }));
 
+  // Trust gate — messages whose author is not in the allowlist go to quarantine.
+  // Human-role messages are always gated; claude-role messages bypass (Oracle's own output).
+  const humans = messages.filter(m => m.role === 'human');
+  const claude = messages.filter(m => m.role !== 'human');
+  const gated = filterBySender(humans, {
+    gateSite: 'arra_thread_read',
+    sourceChannel: `forum/thread/${input.threadId}`,
+    extractSender: (m) => m.author,
+    serializeForQuarantine: (m) => JSON.stringify(m),
+  });
+  messages = [...gated.allowed, ...claude].sort((a, b) => a.id - b.id);
+
   if (input.limit && input.limit > 0) {
     messages = messages.slice(-input.limit);
   }
@@ -194,7 +207,8 @@ export async function handleThreadRead(input: OracleThreadReadInput): Promise<To
         thread_id: threadData.thread.id,
         title: threadData.thread.title,
         status: threadData.thread.status,
-        message_count: threadData.messages.length,
+        message_count: messages.length,
+        quarantined: gated.quarantinedCount,
         messages,
       }, null, 2)
     }]

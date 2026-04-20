@@ -7,6 +7,7 @@
 import path from 'path';
 import fs from 'fs';
 import type { ToolContext, ToolResponse, OracleInboxInput } from './types.ts';
+import { filterBySender, extractHandoffSender } from '../trust/gate.ts';
 
 export const inboxToolDef = {
   name: 'arra_inbox',
@@ -37,7 +38,7 @@ export const inboxToolDef = {
 export async function handleInbox(ctx: ToolContext, input: OracleInboxInput): Promise<ToolResponse> {
   const { limit = 10, offset = 0, type = 'all' } = input;
   const inboxDir = path.join(ctx.repoRoot, 'ψ/inbox');
-  const results: Array<{ filename: string; path: string; created: string; preview: string; type: string }> = [];
+  const results: Array<{ filename: string; path: string; created: string; preview: string; type: string; _sender: string | null }> = [];
 
   if (type === 'all' || type === 'handoff') {
     const handoffDir = path.join(inboxDir, 'handoff');
@@ -61,20 +62,43 @@ export async function handleInbox(ctx: ToolContext, input: OracleInboxInput): Pr
           created,
           preview: content.substring(0, 500),
           type: 'handoff',
+          _sender: extractHandoffSender(file, content),
         });
       }
     }
   }
 
-  const total = results.length;
-  const paginated = results.slice(offset, offset + limit);
+  // Trust gate — upstream of render. Files whose extracted sender is not in
+  // the allowlist go to quarantine; their content is NOT returned.
+  const gated = filterBySender(results, {
+    gateSite: 'arra_inbox',
+    sourceChannel: 'inbox/handoff',
+    extractSender: (r) => r._sender,
+    serializeForQuarantine: (r) => JSON.stringify(r),
+    // Local filesystem: files without a sender are legacy Oracle-authored
+    // handoffs, not external injection. Filesystem write-access is outside
+    // our threat model.
+    trustNullSender: true,
+  });
 
-  console.error(`[MCP:INBOX] ${total} files, returning ${paginated.length} (offset=${offset})`);
+  // Strip the internal _sender field before returning to the MCP client.
+  gated.allowed.forEach((r: any) => delete r._sender);
+
+  const total = gated.allowed.length;
+  const paginated = gated.allowed.slice(offset, offset + limit);
+
+  console.error(`[MCP:INBOX] ${total} files allowed, ${gated.quarantinedCount} quarantined, returning ${paginated.length} (offset=${offset})`);
 
   return {
     content: [{
       type: 'text',
-      text: JSON.stringify({ files: paginated, total, limit, offset }, null, 2)
+      text: JSON.stringify({
+        files: paginated,
+        total,
+        limit,
+        offset,
+        quarantined: gated.quarantinedCount,
+      }, null, 2)
     }]
   };
 }
