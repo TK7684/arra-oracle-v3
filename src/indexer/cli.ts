@@ -4,7 +4,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { DB_PATH, CHROMADB_DIR } from '../config.ts';
+import { DB_PATH, LANCEDB_DIR } from '../config.ts';
 import { getVaultPsiRoot } from '../vault/handler.ts';
 import type { IndexerConfig } from '../types.ts';
 import { OracleIndexer } from './index.ts';
@@ -28,7 +28,11 @@ const repoRoot = process.env.ORACLE_REPO_ROOT ||
 const config: IndexerConfig = {
   repoRoot,
   dbPath: DB_PATH,
-  chromaPath: CHROMADB_DIR,
+  // BUG FIX 2026-04-24: was CHROMADB_DIR (~/.chromadb/) — server factory.ts:75
+  // defaults LanceDB data path to LANCEDB_DIR (~/.arra-oracle-v2/lancedb/).
+  // The mismatch meant indexer wrote vectors into a directory the server never
+  // read, so every vector search returned 0 even when SQLite had 3,500+ docs.
+  chromaPath: LANCEDB_DIR,
   sourcePaths: {
     resonance: '\u03c8/memory/resonance',
     learnings: '\u03c8/memory/learnings',
